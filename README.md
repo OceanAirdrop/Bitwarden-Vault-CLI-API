@@ -14,11 +14,16 @@ Example C# Code:
     {
         using (var bitwarden = new BitwardenCLI("username@gmail.com", "password"))
         {
+            // Get the vault status
             var status  = bitwarden.Status();
+            
+            // Get a list of the oragnisations
             var orgs    = bitwarden.ListOrganisations();
+            
+            // Get a list of all the available collections
             var colls   = bitwarden.ListCollections();
         
-            // Get a list of al the items in the vault
+            // Get a list of all the items in the vault
             var vaultItems = bitwarden.ListItems();
 
             // Create a new secure note
@@ -33,7 +38,7 @@ Example C# Code:
             // Get a list of items that contain the word "test" in a specific collection
             var testItemsInColl = bitwarden.ListItems(searchPattern: "test", collectionId: "collection-guid");
 
-            // Delete all test items
+            // Delete all test items from the vault
             foreach (var item in testItemsInColl)
             {
                 bitwarden.DeleteItem(item.id);
