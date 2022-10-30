@@ -8,7 +8,7 @@ This project is a simple C# wrapper that integrates with the Bitwarden CLI (Comm
 
 The Documentation on the Bitwarden CLI is available here: https://bitwarden.com/help/cli/
 
-The Bitwarden `bw.exe` CLI meeds to be in the same diretcory as the .exe.  You can download the BitWarden CLI from here: https://bitwarden.com/help/cli/
+The Bitwarden `bw.exe` CLI needs to be in the same diretcory as the .exe.  You can download the BitWarden CLI from the Bitwarden website
 
 This proof of concept API has only been tested on Windows
 
