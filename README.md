@@ -1,6 +1,10 @@
 # Bitwarden-Vault-CLI-API
 
-A simple C# wrapper that integrates with the Bitwarden CLI (Command Line Interface) and makes it available as an API (App Programming Interface) accessible via C#.
+The offical Bitwarden API is only for organisational management.  If you want to manage your Bitwarden Vault there is the BitWarden CLI.
+
+Via the CLI, you do have the ability to call Resful API's from HTTP using the `serve` command but I wanted to experiment with wrapping the CLI interface with a C# class.
+
+This project is a simple C# wrapper that integrates with the Bitwarden CLI (Command Line Interface) and makes it available as an API (App Programming Interface) accessible via C# code.
 
 The Documentation on the Bitwarden CLI is available here: https://bitwarden.com/help/cli/
 
