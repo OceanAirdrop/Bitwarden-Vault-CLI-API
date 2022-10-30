@@ -8,7 +8,7 @@ The Bitwarden CLI meeds to be in the same diretcory as the .exe
 
 This proof of concept API has only been tested on Windows
 
-// Example C# Code:
+Example C# Code:
 
     static void TestBitwardenCLI()
     {
