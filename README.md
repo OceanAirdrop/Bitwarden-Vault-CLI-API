@@ -15,13 +15,13 @@ Example C# Code:
         using (var bitwarden = new BitwardenCLI("username@gmail.com", "password"))
         {
             // Get the vault status
-            var status  = bitwarden.Status();
+            var status = bitwarden.Status();
             
             // Get a list of the oragnisations
-            var orgs    = bitwarden.ListOrganisations();
+            var orgs = bitwarden.ListOrganisations();
             
             // Get a list of all the available collections
-            var colls   = bitwarden.ListCollections();
+            var colls = bitwarden.ListCollections();
         
             // Get a list of all the items in the vault
             var vaultItems = bitwarden.ListItems();
