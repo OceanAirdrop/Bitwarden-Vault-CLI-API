@@ -1,5 +1,6 @@
-﻿using BitwardenVaultCLI_API.Model;
+using BitwardenVaultCLI_API.Model;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace BitwardenVaultCLI_API.Controller
 {
-    // This class hosts the Create a Worker Service that  hosts bit warden CLI
     // https://bitwarden.com/help/cli/
 
     public class BitwardenCLI : IDisposable
@@ -198,6 +198,53 @@ namespace BitwardenVaultCLI_API.Controller
 
         }
 
+        public (bool result, string resultMsg, Item item) GetItem(string id_or_name)
+        {
+            // If the item cant be found in the vault the msg field explains what happened.
+
+            Item item = null; // return null if cant find 
+
+            // by default assume successful retrieval of item from vault
+            var vaultItem = (result: true, msg: "Success", item: item);
+
+            var cmd = $"get item {id_or_name} --session \"{m_session}\"";
+
+            var json = IssueBitWardenCommand(cmd);
+
+            if (ValidateJSON(json))
+                vaultItem.item = JsonConvert.DeserializeObject<Item>(json);
+            else
+            {
+                vaultItem.msg = json;
+                vaultItem.result = false; 
+            }
+
+            return vaultItem;
+        }
+
+        public bool EditItem(Item editedItem)
+        {
+            // This will edit an item in your vault.
+            // To use this function you Will first need to GetItem() or ListItems() to get an Item object..
+            // Then edit any fields you need and call EditItem
+
+            bool editSuccess = false;
+
+            var json = JsonConvert.SerializeObject(editedItem);
+
+            var encodedJson = Base64Encode(json);
+
+            var cmd = $"echo {encodedJson} | \"{GetAppLocation()}\\bw.exe\" edit item {editedItem.id} --session \"{m_session}\"";
+
+            var result = IssueCmdCommand(cmd);
+
+            // if we get JSON back the edit was successful
+            editSuccess = ValidateJSON(json);
+
+            return editSuccess;
+        }
+
+
         public string IssueBitWardenCommand(string cmd)
         {
 
@@ -286,10 +333,24 @@ namespace BitwardenVaultCLI_API.Controller
             return runningFrom;
         }
 
-        public string Base64Encode(string plainText)
+        private string Base64Encode(string plainText)
         {
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
             return System.Convert.ToBase64String(plainTextBytes);
+        }
+
+        private bool ValidateJSON(string s)
+        {
+            try
+            {
+                JToken.Parse(s);
+                return true;
+            }
+            catch (JsonReaderException ex)
+            {
+                Trace.WriteLine(ex);
+                return false;
+            }
         }
 
         public void Dispose()
