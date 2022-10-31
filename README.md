@@ -41,6 +41,16 @@ Example C# Code:
         
             // Get a list of items that contain the word "test" in a specific collection
             var testItemsInColl = bitwarden.ListItems(searchPattern: "test", collectionId: "collection-guid");
+            
+            // Get Item by Name
+            var vaultItem1 = bitwarden.GetItem("My test Login");
+
+            // Get Item by Id
+            var vaultItem2 = bitwarden.GetItem("f6184129-6cf5-4a61-8904-318e821a7615");
+
+            // Edit existing item in the vault
+            vaultItem2.item.notes = "some extra notes";
+            bitwarden.EditItem(vaultItem2.item);
 
             // Delete all test items from the vault
             foreach (var item in testItemsInColl)
