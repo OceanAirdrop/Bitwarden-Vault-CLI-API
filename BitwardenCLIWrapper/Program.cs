@@ -24,6 +24,13 @@ static void TestBitwardenCLI()
         var items3 = bitwarden.ListItems(searchPattern: "test");
         var items33 = bitwarden.ListItems(searchPattern: "test", collectionId: "collection-guid");
 
+        var vaultItem1 = bitwarden.GetItem("f6184129-6cf5-4a61-8904-318e821a7615");
+        var vaultItem2 = bitwarden.GetItem("My test Login");
+        
+        // Edit item
+        vaultItem2.item.notes = "some extra notes";
+        bitwarden.EditItem(vaultItem2.item);
+        
         foreach (var item in items33)
         {
             bitwarden.DeleteItem(item.id);
