@@ -244,6 +244,24 @@ namespace BitwardenVaultCLI_API.Controller
             return editSuccess;
         }
 
+        public void CreateAttachment(string itemGuid, string filePath )
+        {
+            var cmd = $"create attachment --file \"{filePath}\" --itemid {itemGuid} --session \"{m_session}\"";
+
+            var json = IssueBitWardenCommand(cmd);
+        }
+
+        public string DownloadAttachment(string itemGuid, string attachementName, string outputPath = "")
+        {
+            var cmd = $"get attachment \"{attachementName}\" --itemid {itemGuid} --session \"{m_session}\"";
+
+            if (!string.IsNullOrEmpty(outputPath))
+                cmd = $"get attachment \"{attachementName}\" --itemid {itemGuid} --output \"{outputPath}\" --session \"{m_session}\"";
+
+            var result = IssueBitWardenCommand(cmd);
+
+            return result;
+        }
 
         public string IssueBitWardenCommand(string cmd)
         {
