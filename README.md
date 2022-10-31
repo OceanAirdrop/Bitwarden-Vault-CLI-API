@@ -51,7 +51,13 @@ Example C# Code:
             // Edit existing item in the vault
             vaultItem2.item.notes = "some extra notes";
             bitwarden.EditItem(vaultItem2.item);
-
+            
+            // Create an attachement
+            bitwarden.CreateAttachment("f6184129-6cf5-4a61-8904-318e821a7615", @"C:\Files\SomeFile.txt");
+            
+            // Download an attachement
+            bitwarden.DownloadAttachment("f6184129-6cf5-4a61-8904-318e821a7615", "SomeFile.txt" );
+            
             // Delete all test items from the vault
             foreach (var item in testItemsInColl)
             {
