@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -31,6 +31,7 @@ namespace BitwardenVaultCLI_API.Model
         public bool favorite { get; set; }
         public Login login { get; set; }
         public List<string> collectionIds { get; set; }
+        public List<Attachment> attachments { get; set; }
         public DateTime revisionDate { get; set; }
         public object deletedDate { get; set; }
     }
@@ -48,5 +49,15 @@ namespace BitwardenVaultCLI_API.Model
         public string name { get; set; }
         public string value { get; set; }
         public int type { get; set; }
+    }
+
+    [DebuggerDisplay("Name = {fileName}")]
+    public class Attachment
+    {
+        public string id { get; set; }
+        public string fileName { get; set; }
+        public string size { get; set; }
+        public string sizeName { get; set; }
+        public string url { get; set; }
     }
 }
