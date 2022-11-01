@@ -262,6 +262,16 @@ namespace BitwardenVaultCLI_API.Controller
 
             return result;
         }
+        
+        public void DeleteAttachment(string itemGuid, string attachmentId, string orgId = "")
+        {
+            var cmd = $"delete attachment {attachmentId} --itemid {itemGuid} --session \"{m_session}\"";
+
+            if (!string.IsNullOrEmpty(orgId))
+                cmd = $"delete attachment {attachmentId} --itemid {itemGuid} --organizationid {orgId} --session \"{m_session}\"";
+
+            var result = IssueBitWardenCommand(cmd);
+        }
 
         public string IssueBitWardenCommand(string cmd)
         {
