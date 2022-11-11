@@ -20,6 +20,11 @@ namespace BitwardenVaultCLI_API.Controller
         {
             m_session = LogIn(userName, password);
         }
+        
+        public BitwardenCLI(string clientId, string clientSecret, string password)
+        {
+            m_session = LogInUsingApi(clientId, clientSecret, password);
+        }
 
         public string LogIn(string userName, string password)
         {
@@ -33,6 +38,45 @@ namespace BitwardenVaultCLI_API.Controller
                 // remove the \r\n
                 m_session = result.Replace("\r\n", string.Empty);
             }
+
+            return result;
+        }
+        
+        string LogInUsingApi(string clientId, string clientSecret, string password)
+        {
+            string result = "";
+
+            var appLocation = GetAppLocation();
+
+            // Write a batch file to execute
+            string batFileName = Path.Combine(GetAppLocation(), $"{Guid.NewGuid()}.bat");
+            using (var batFile = new StreamWriter(batFileName))
+            {
+                batFile.WriteLine($"CD {appLocation}");
+                batFile.WriteLine($"set BW_CLIENTID={clientId}");
+                batFile.WriteLine($"set BW_CLIENTSECRET={clientSecret}");
+                batFile.WriteLine("bw login --apikey");
+                batFile.WriteLine($"bw unlock {password} --raw >{Path.Combine(appLocation, "temp.log")} 2>&1");
+            }
+
+            // The flag /c tells "cmd" to execute what follows and exit
+            var procStartInfo = new ProcessStartInfo("cmd", "/c " + batFileName);
+            procStartInfo.UseShellExecute = true;
+            procStartInfo.CreateNoWindow = true;
+            procStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+            var proc = new Process();
+            proc.StartInfo = procStartInfo;
+            proc.Start();
+            proc.WaitForExit();
+
+            // now read file back to get session key.
+            string filePath = Path.Combine(GetAppLocation(), "temp.log");
+            result = System.IO.File.ReadAllText(filePath);
+
+            // now cleanup
+            File.Delete(filePath);
+            File.Delete(batFileName);
 
             return result;
         }
