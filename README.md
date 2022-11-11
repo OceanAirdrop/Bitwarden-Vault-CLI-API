@@ -16,6 +16,16 @@ Example C# Code:
 
     static void TestBitwardenCLI()
     {
+        // You can login using your API credentials
+        using (var bitwarden = new BitwardenCLI(clientId: "user.abc", clientSecret:"xyz", password:"password" ))
+        {
+            // Get the vault status
+            var status = bitwarden.Status();
+            
+            // etc
+        }
+        
+        // Or you can login using normal email/password
         using (var bitwarden = new BitwardenCLI("username@gmail.com", "password"))
         {
             // Get the vault status
