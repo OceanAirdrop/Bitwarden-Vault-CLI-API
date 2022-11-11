@@ -28,8 +28,8 @@ namespace BitwardenVaultCLI_API.Controller
 
         public string LogIn(string userName, string password)
         {
-            // sanity logout!
-            LogOut();
+            EnsureBwExeExists();
+            LogOut(); // sanity logout!
 
             var result = IssueBitWardenCommand($"login {userName} {password} --raw");
 
@@ -45,7 +45,9 @@ namespace BitwardenVaultCLI_API.Controller
         string LogInUsingApi(string clientId, string clientSecret, string password)
         {
             string result = "";
-
+            
+            EnsureBwExeExists();
+            
             var appLocation = GetAppLocation();
 
             // Write a batch file to execute
@@ -79,6 +81,14 @@ namespace BitwardenVaultCLI_API.Controller
             File.Delete(batFileName);
 
             return result;
+        }
+
+        void EnsureBwExeExists()
+        {
+            var filePath = Path.Combine(GetAppLocation(), "bw.exe");
+
+            if (!File.Exists(filePath))
+                throw new Exception("bw.exe not found in current directory");
         }
 
         public string LogOut()
