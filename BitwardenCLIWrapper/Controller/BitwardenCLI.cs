@@ -50,6 +50,11 @@ namespace BitwardenVaultCLI_API.Controller
             {
                 throw new Exception(result);
             }
+            if (result.Contains("Two-step token is invalid") == true)
+            {
+                throw new Exception(result);
+            }
+
             if (!result.StartsWith("You are already"))
             {
                 // remove the \r\n
