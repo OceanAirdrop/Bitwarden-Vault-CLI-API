@@ -39,21 +39,20 @@ namespace BitwardenVaultCLI_API.Controller
 
         public string LogIn(string url, string userName, string password, int otp = -1)
         {
-            LogOut(); // sanity logout!
+            try
+            {
+                LogOut(); // sanity logout!
+            }
+            catch (Exception)
+            {
+
+            }
+            
             var result1 = IssueBitWardenCommand($"config server {url}");
 
             var otpMethod = (otp > -1) ? $"--method 0 --code {otp}" : "";
             var result = IssueBitWardenCommand($"login {userName} {password} --raw {otpMethod}");
             result = result.Replace("\r\n", string.Empty);
-
-            if (result.Contains("Username or password is incorrect") == true)
-            {
-                throw new Exception(result);
-            }
-            if (result.Contains("Two-step token is invalid") == true)
-            {
-                throw new Exception(result);
-            }
 
             if (!result.StartsWith("You are already"))
             {
@@ -66,7 +65,6 @@ namespace BitwardenVaultCLI_API.Controller
         
         string LogInUsingApi(string url, string clientId, string clientSecret, string password)
         {
-            var bw = GetBWBinaryFilePath();
 
             string output = "";
 
@@ -79,30 +77,10 @@ namespace BitwardenVaultCLI_API.Controller
             commands.Add($"unlock {password} --raw");
 
 
-            foreach (var command in commands)
+            foreach (var cmd in commands)
             {
                 //Console.Write(command + " --> "); //to tests
-
-                var procStartInfo = new ProcessStartInfo(bw, command);
-                procStartInfo.UseShellExecute = false;
-                procStartInfo.CreateNoWindow = true;
-                procStartInfo.RedirectStandardError = false;
-                procStartInfo.RedirectStandardOutput = true;
-                //procStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                var proc = new Process();
-                proc.StartInfo = procStartInfo;
-                proc.Start();
-                proc.WaitForExit();
-
-                try
-                {
-                    output = proc.StandardOutput.ReadToEnd();
-                    //Console.WriteLine(output);//to tests
-                }
-                catch (Exception)
-                {
-                    //Console.WriteLine();
-                }
+                output = IssueBitWardenCommand(cmd);
             }
 
 
@@ -390,9 +368,9 @@ namespace BitwardenVaultCLI_API.Controller
             p.WaitForExit();
 
             var errorResponse = error.ToString();
-            if (!string.IsNullOrWhiteSpace(errorResponse))
+            if (!string.IsNullOrWhiteSpace(errorResponse) && errorResponse.Contains("You are already logged") == false)
             {
-                return errorResponse;
+                throw new Exception(errorResponse);
             }
 
             return output.ToString();
@@ -467,7 +445,14 @@ namespace BitwardenVaultCLI_API.Controller
 
         public void Dispose()
         {
-            LogOut();
+            try
+            {
+                LogOut(); // sanity logout!
+            }
+            catch (Exception)
+            {
+
+            }
         }
     }
 }
