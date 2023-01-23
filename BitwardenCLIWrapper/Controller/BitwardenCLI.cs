@@ -16,80 +16,88 @@ namespace BitwardenVaultCLI_API.Controller
     {
         private string m_session = "";
 
-        public BitwardenCLI(string userName, string password)
+        public BitwardenCLI(string url, string userName, string password)
         {
-            m_session = LogIn(userName, password);
+            m_session = LogIn(url, userName, password);
         }
         
-        public BitwardenCLI(string clientId, string clientSecret, string password)
+        public BitwardenCLI(string url, string userName, string password, int otp)
         {
-            m_session = LogInUsingApi(clientId, clientSecret, password);
+            m_session = LogIn(url, userName, password, otp);
         }
 
-        public string LogIn(string userName, string password)
+        public BitwardenCLI(string url, string clientId, string clientSecret, string password)
         {
-            EnsureBwExeExists();
-            LogOut(); // sanity logout!
+            m_session = LogInUsingApi(url, clientId, clientSecret, password);
+            if (m_session == "")
+            {
+                throw new Exception("Can't logging into Bitwarden. Check the client_id, client_secret and password and try again.");
+            }
+        }
 
-            var result = IssueBitWardenCommand($"login {userName} {password} --raw");
+
+
+        public string LogIn(string url, string userName, string password, int otp = -1)
+        {
+            try
+            {
+                LogOut(); // sanity logout!
+            }
+            catch (Exception)
+            {
+
+            }
+            
+            var result1 = IssueBitWardenCommand($"config server {url}");
+
+            var otpMethod = (otp > -1) ? $"--method 0 --code {otp}" : "";
+            var result = IssueBitWardenCommand($"login {userName} {password} --raw {otpMethod}");
+            result = result.Replace("\r\n", string.Empty);
 
             if (!result.StartsWith("You are already"))
             {
                 // remove the \r\n
-                m_session = result.Replace("\r\n", string.Empty);
+                m_session = result;
             }
 
             return result;
         }
         
-        string LogInUsingApi(string clientId, string clientSecret, string password)
+        string LogInUsingApi(string url, string clientId, string clientSecret, string password)
         {
-            string result = "";
-            
-            EnsureBwExeExists();
-            
-            var appLocation = GetAppLocation();
 
-            // Write a batch file to execute
-            string batFileName = Path.Combine(GetAppLocation(), $"{Guid.NewGuid()}.bat");
-            using (var batFile = new StreamWriter(batFileName))
+            string output = "";
+
+            Environment.SetEnvironmentVariable("BW_CLIENTID", clientId);
+            Environment.SetEnvironmentVariable("BW_CLIENTSECRET", clientSecret);
+
+            List<string> commands = new List<string>();
+            commands.Add($"config server {url}");
+            commands.Add($"login --apikey");
+            commands.Add($"unlock {password} --raw");
+
+
+            foreach (var cmd in commands)
             {
-                batFile.WriteLine($"CD {appLocation}");
-                batFile.WriteLine($"set BW_CLIENTID={clientId}");
-                batFile.WriteLine($"set BW_CLIENTSECRET={clientSecret}");
-                batFile.WriteLine("bw login --apikey");
-                batFile.WriteLine($"bw unlock {password} --raw >{Path.Combine(appLocation, "temp.log")} 2>&1");
+                //Console.Write(command + " --> "); //to tests
+                output = IssueBitWardenCommand(cmd);
             }
 
-            // The flag /c tells "cmd" to execute what follows and exit
-            var procStartInfo = new ProcessStartInfo("cmd", "/c " + batFileName);
-            procStartInfo.UseShellExecute = true;
-            procStartInfo.CreateNoWindow = true;
-            procStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-            var proc = new Process();
-            proc.StartInfo = procStartInfo;
-            proc.Start();
-            proc.WaitForExit();
-
-            // now read file back to get session key.
-            string filePath = Path.Combine(GetAppLocation(), "temp.log");
-            result = System.IO.File.ReadAllText(filePath);
-
-            // now cleanup
-            File.Delete(filePath);
-            File.Delete(batFileName);
-
-            return result;
+            return output;
         }
 
-        void EnsureBwExeExists()
+        private string GetBWBinaryFilePath()
         {
-            var filePath = Path.Combine(GetAppLocation(), "bw.exe");
+            var fileBW = (Environment.OSVersion.Platform.ToString().StartsWith("Win")) ? "bw.exe" : "bw";
+            var filePath = Path.Combine(GetAppLocation(), fileBW);
 
             if (!File.Exists(filePath))
-                throw new Exception("bw.exe not found in current directory");
+                throw new Exception($"{fileBW} not found in current directory. Before start, please download the last version of Bitwarden CLI (BW) from https://bitwarden.com/help/cli/");
+            return fileBW;
         }
+
+
 
         public string LogOut()
         {
@@ -329,12 +337,12 @@ namespace BitwardenVaultCLI_API.Controller
 
         public string IssueBitWardenCommand(string cmd)
         {
-
+            var bw = GetBWBinaryFilePath();
             var output = new StringBuilder();
             var error = new StringBuilder();
 
             var p = new Process();
-            p.StartInfo.FileName = $"{GetAppLocation()}\\bw.exe";
+            p.StartInfo.FileName = bw;
             p.StartInfo.Arguments = $"{cmd}";
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.CreateNoWindow = true;
@@ -360,9 +368,9 @@ namespace BitwardenVaultCLI_API.Controller
             p.WaitForExit();
 
             var errorResponse = error.ToString();
-            if (!string.IsNullOrWhiteSpace(errorResponse))
+            if (!string.IsNullOrWhiteSpace(errorResponse) && errorResponse.Contains("You are already logged") == false)
             {
-                return errorResponse;
+                throw new Exception(errorResponse);
             }
 
             return output.ToString();
@@ -437,7 +445,14 @@ namespace BitwardenVaultCLI_API.Controller
 
         public void Dispose()
         {
-            LogOut();
+            try
+            {
+                LogOut(); // sanity logout!
+            }
+            catch (Exception)
+            {
+
+            }
         }
     }
 }

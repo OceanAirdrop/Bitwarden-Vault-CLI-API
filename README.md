@@ -12,19 +12,41 @@ This proof of concept API has only been tested on Windows
 
 Example C# Code:
 
+``` C#
     static void TestBitwardenCLI()
     {
-        // You can login using your API credentials
-        using (var bitwarden = new BitwardenCLI(clientId: "user.abc", clientSecret:"xyz", password:"password" ))
+        string client_id = "user.YourClientID";       //see https://bitwarden.com/help/public-api/
+        string client_secret = "YourClientSecret";    //see https://bitwarden.com/help/public-api/
+        string email = "yourmail@yourdomain.com";
+        string password = "Sup3rS3cr3tP@ssw0rd";
+        int otp2FA = 999999;                                //it's not mandatory, but highly recommended
+        string url = "https://yourownserver.youdomain.com"; //default: https://vault.bitwarden.com
+
+        BitwardenCLI bitwarden;
+        try
         {
-            // Get the vault status
-            var status = bitwarden.Status();
-            
-            // etc
+            Console.Write("Trying logging into Bitwarden ... ");
+
+            //Choose just one method to login
+
+            //login with email
+            bitwarden = new BitwardenCLI(url, email, password);
+
+            //login with email and OTP 2FA
+            bitwarden = new BitwardenCLI(url, email, password, otp2FA); 
+
+            //login with client_id and client_secret
+            bitwarden = new BitwardenCLI(url, client_id, client_secret, password);
+
+            Console.WriteLine("Success!");
         }
-        
-        // Or you can login using normal email/password
-        using (var bitwarden = new BitwardenCLI("username@gmail.com", "password"))
+        catch (Exception error)
+        {
+            Console.WriteLine($"Fail: {error.Message}");
+            return;
+        }
+
+
         {
             // Get the vault status
             var status = bitwarden.Status();
@@ -74,3 +96,4 @@ Example C# Code:
 
         } // LogOut()  is called automatically when you exit this using statement.
     }
+```

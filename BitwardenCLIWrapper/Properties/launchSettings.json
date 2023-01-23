@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "BitwardenVaultCLI_API": {
+      "commandName": "Project"
+    },
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    }
+  }
+}
