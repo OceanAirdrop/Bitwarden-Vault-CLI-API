@@ -1,4 +1,4 @@
-﻿using BitwardenVaultCLI_API.Controller;
+using BitwardenVaultCLI_API.Controller;
 
 Console.WriteLine("Testing BitwardenCLI API");
 
@@ -15,11 +15,24 @@ static void TestBitwardenCLI()
     string password = "Sup3rS3cr3tP@ssw0rd";
     string url = "https://yourownserver.youdomain.com";
 
+    BitwardenCLI bitwarden;
+    try
+    {
     //login with email
-    var bitwarden = new BitwardenCLI(url, email, password); 
+        Console.Write("Trying logging into Bitwarden ... ");
+        //var bitwarden = new BitwardenCLI(url, email, password); 
 
     //login with client_id and client_secret
-    //var bitwarden = new BitwardenCLI(url, client_id, client_secret, password);
+        bitwarden = new BitwardenCLI(url, client_id, client_secret, password);
+
+        Console.WriteLine("Success!");
+    }
+    catch (Exception error)
+    {
+        Console.WriteLine(error.Message);
+        return;
+    }
+    
 
 
     {
