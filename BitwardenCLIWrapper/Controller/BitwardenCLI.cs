@@ -26,7 +26,7 @@ namespace BitwardenVaultCLI_API.Controller
             m_session = LogInUsingApi(url, clientId, clientSecret, password);
             if (m_session == "")
             {
-                throw new Exception("Can't logging into Bitwarden. Check the client_id, client_secret and password");
+                throw new Exception("Can't logging into Bitwarden. Check the client_id, client_secret and password and try again.");
             }
         }
 
@@ -35,11 +35,16 @@ namespace BitwardenVaultCLI_API.Controller
             LogOut(); // sanity logout!
             var result1 = IssueBitWardenCommand($"config server {url}");
             var result = IssueBitWardenCommand($"login {userName} {password} --raw");
+            result = result.Replace("\r\n", string.Empty);
 
+            if (result.Contains("Username or password is incorrect") == true)
+            {
+                throw new Exception(result);
+            }
             if (!result.StartsWith("You are already"))
             {
                 // remove the \r\n
-                m_session = result.Replace("\r\n", string.Empty);
+                m_session = result;
             }
 
             return result;
