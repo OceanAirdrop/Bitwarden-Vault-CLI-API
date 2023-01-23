@@ -20,6 +20,11 @@ namespace BitwardenVaultCLI_API.Controller
         {
             m_session = LogIn(url, userName, password);
         }
+        
+        public BitwardenCLI(string url, string userName, string password, int otp)
+        {
+            m_session = LogIn(url, userName, password, otp);
+        }
 
         public BitwardenCLI(string url, string clientId, string clientSecret, string password)
         {
@@ -30,11 +35,15 @@ namespace BitwardenVaultCLI_API.Controller
             }
         }
 
-        public string LogIn(string url, string userName, string password)
+
+
+        public string LogIn(string url, string userName, string password, int otp = -1)
         {
             LogOut(); // sanity logout!
             var result1 = IssueBitWardenCommand($"config server {url}");
-            var result = IssueBitWardenCommand($"login {userName} {password} --raw");
+
+            var otpMethod = (otp > -1) ? $"--method 0 --code {otp}" : "";
+            var result = IssueBitWardenCommand($"login {userName} {password} --raw {otpMethod}");
             result = result.Replace("\r\n", string.Empty);
 
             if (result.Contains("Username or password is incorrect") == true)

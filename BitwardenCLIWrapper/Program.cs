@@ -13,17 +13,22 @@ static void TestBitwardenCLI()
     string client_secret = "YourClientSecret";    //see https://bitwarden.com/help/public-api/
     string email = "yourmail@yourdomain.com";
     string password = "Sup3rS3cr3tP@ssw0rd";
-    string url = "https://yourownserver.youdomain.com";
+    int otp2FA = 999999;
+    string url = "https://yourownserver.youdomain.com"; //default: https://vault.bitwarden.com
 
     BitwardenCLI bitwarden;
     try
     {
-    //login with email
         Console.Write("Trying logging into Bitwarden ... ");
-        //var bitwarden = new BitwardenCLI(url, email, password); 
+
+        //login with email
+        bitwarden = new BitwardenCLI(url, email, password);
+
+        //login with email and OTP 2FA
+        bitwarden = new BitwardenCLI(url, email, password, otp2FA); 
 
     //login with client_id and client_secret
-        bitwarden = new BitwardenCLI(url, client_id, client_secret, password);
+        //bitwarden = new BitwardenCLI(url, client_id, client_secret, password);
 
         Console.WriteLine("Success!");
     }
