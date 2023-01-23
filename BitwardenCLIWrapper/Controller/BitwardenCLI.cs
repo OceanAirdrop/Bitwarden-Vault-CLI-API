@@ -28,7 +28,6 @@ namespace BitwardenVaultCLI_API.Controller
 
         public string LogIn(string userName, string password)
         {
-            EnsureBwExeExists();
             LogOut(); // sanity logout!
 
             var result = IssueBitWardenCommand($"login {userName} {password} --raw");
@@ -44,52 +43,59 @@ namespace BitwardenVaultCLI_API.Controller
         
         string LogInUsingApi(string clientId, string clientSecret, string password)
         {
-            string result = "";
-            
-            EnsureBwExeExists();
-            
-            var appLocation = GetAppLocation();
+            var bw = GetBWBinaryFilePath();
 
-            // Write a batch file to execute
-            string batFileName = Path.Combine(GetAppLocation(), $"{Guid.NewGuid()}.bat");
-            using (var batFile = new StreamWriter(batFileName))
+            string output = "";
+
+            Environment.SetEnvironmentVariable("BW_CLIENTID", clientId);
+            Environment.SetEnvironmentVariable("BW_CLIENTSECRET", clientSecret);
+
+            List<string> commands= new List<string>();
+            commands.Add($"login --apikey");
+            commands.Add($"unlock {password} --raw");
+
+            
+            foreach (var command in commands)
             {
-                batFile.WriteLine($"CD {appLocation}");
-                batFile.WriteLine($"set BW_CLIENTID={clientId}");
-                batFile.WriteLine($"set BW_CLIENTSECRET={clientSecret}");
-                batFile.WriteLine("bw login --apikey");
-                batFile.WriteLine($"bw unlock {password} --raw >{Path.Combine(appLocation, "temp.log")} 2>&1");
+                //Console.Write(command + " --> "); //to tests
+
+                var procStartInfo = new ProcessStartInfo(bw, command);
+                procStartInfo.UseShellExecute = false;
+                procStartInfo.CreateNoWindow = true;
+                procStartInfo.RedirectStandardError = false;
+                procStartInfo.RedirectStandardOutput = true;
+                //procStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                var proc = new Process();
+                proc.StartInfo = procStartInfo;
+                proc.Start();
+                proc.WaitForExit();
+
+                try
+                {
+                    output = proc.StandardOutput.ReadToEnd();
+                    //Console.WriteLine(output);//to tests
+                }
+                catch (Exception)
+                {
+                    //Console.WriteLine();
+                }
             }
 
-            // The flag /c tells "cmd" to execute what follows and exit
-            var procStartInfo = new ProcessStartInfo("cmd", "/c " + batFileName);
-            procStartInfo.UseShellExecute = true;
-            procStartInfo.CreateNoWindow = true;
-            procStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-            var proc = new Process();
-            proc.StartInfo = procStartInfo;
-            proc.Start();
-            proc.WaitForExit();
-
-            // now read file back to get session key.
-            string filePath = Path.Combine(GetAppLocation(), "temp.log");
-            result = System.IO.File.ReadAllText(filePath);
-
-            // now cleanup
-            File.Delete(filePath);
-            File.Delete(batFileName);
-
-            return result;
+            return output;
         }
 
-        void EnsureBwExeExists()
+        private string GetBWBinaryFilePath()
         {
-            var filePath = Path.Combine(GetAppLocation(), "bw.exe");
+            var fileBW = (Environment.OSVersion.Platform.ToString().StartsWith("Win")) ? "bw.exe" : "bw";
+            var filePath = Path.Combine(GetAppLocation(), fileBW);
 
             if (!File.Exists(filePath))
-                throw new Exception("bw.exe not found in current directory");
+                throw new Exception($"{fileBW} not found in current directory. Before start, please download the last version of Bitwarden CLI (BW) from https://bitwarden.com/help/cli/");
+            return fileBW;
         }
+
+
 
         public string LogOut()
         {
@@ -329,12 +335,12 @@ namespace BitwardenVaultCLI_API.Controller
 
         public string IssueBitWardenCommand(string cmd)
         {
-
+            var bw = GetBWBinaryFilePath();
             var output = new StringBuilder();
             var error = new StringBuilder();
 
             var p = new Process();
-            p.StartInfo.FileName = $"{GetAppLocation()}\\bw.exe";
+            p.StartInfo.FileName = bw;
             p.StartInfo.Arguments = $"{cmd}";
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.CreateNoWindow = true;

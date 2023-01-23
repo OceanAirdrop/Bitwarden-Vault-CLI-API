@@ -9,7 +9,18 @@ TestBitwardenCLI();
 
 static void TestBitwardenCLI()
 {
-    using (var bitwarden = new BitwardenCLI("username@gmail.com", "password"))
+    string client_id = "user.YourClientID";       //see https://bitwarden.com/help/public-api/
+    string client_secret = "YourClientSecret";    //see https://bitwarden.com/help/public-api/
+    string email = "yourmail@yourdomain.com";
+    string password = "Sup3rS3cr3tP@ssw0rd";
+
+    //login with email
+    //var bitwarden = new BitwardenCLI(email, password); 
+
+    //login with client_id and client_secret
+    var bitwarden = new BitwardenCLI(client_id, client_secret, password);
+
+
     {
         var status  = bitwarden.Status();
         var orgs    = bitwarden.ListOrganisations();
