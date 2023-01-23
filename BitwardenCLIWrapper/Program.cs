@@ -13,12 +13,13 @@ static void TestBitwardenCLI()
     string client_secret = "YourClientSecret";    //see https://bitwarden.com/help/public-api/
     string email = "yourmail@yourdomain.com";
     string password = "Sup3rS3cr3tP@ssw0rd";
+    string url = "https://yourownserver.youdomain.com";
 
     //login with email
-    //var bitwarden = new BitwardenCLI(email, password); 
+    var bitwarden = new BitwardenCLI(url, email, password); 
 
     //login with client_id and client_secret
-    var bitwarden = new BitwardenCLI(client_id, client_secret, password);
+    //var bitwarden = new BitwardenCLI(url, client_id, client_secret, password);
 
 
     {

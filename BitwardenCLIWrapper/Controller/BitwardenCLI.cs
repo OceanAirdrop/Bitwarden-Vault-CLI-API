@@ -16,20 +16,24 @@ namespace BitwardenVaultCLI_API.Controller
     {
         private string m_session = "";
 
-        public BitwardenCLI(string userName, string password)
+        public BitwardenCLI(string url, string userName, string password)
         {
-            m_session = LogIn(userName, password);
-        }
-        
-        public BitwardenCLI(string clientId, string clientSecret, string password)
-        {
-            m_session = LogInUsingApi(clientId, clientSecret, password);
+            m_session = LogIn(url, userName, password);
         }
 
-        public string LogIn(string userName, string password)
+        public BitwardenCLI(string url, string clientId, string clientSecret, string password)
+        {
+            m_session = LogInUsingApi(url, clientId, clientSecret, password);
+            if (m_session == "")
+            {
+                throw new Exception("Can't logging into Bitwarden. Check the client_id, client_secret and password");
+            }
+        }
+
+        public string LogIn(string url, string userName, string password)
         {
             LogOut(); // sanity logout!
-
+            var result1 = IssueBitWardenCommand($"config server {url}");
             var result = IssueBitWardenCommand($"login {userName} {password} --raw");
 
             if (!result.StartsWith("You are already"))
@@ -41,7 +45,7 @@ namespace BitwardenVaultCLI_API.Controller
             return result;
         }
         
-        string LogInUsingApi(string clientId, string clientSecret, string password)
+        string LogInUsingApi(string url, string clientId, string clientSecret, string password)
         {
             var bw = GetBWBinaryFilePath();
 
@@ -50,11 +54,12 @@ namespace BitwardenVaultCLI_API.Controller
             Environment.SetEnvironmentVariable("BW_CLIENTID", clientId);
             Environment.SetEnvironmentVariable("BW_CLIENTSECRET", clientSecret);
 
-            List<string> commands= new List<string>();
+            List<string> commands = new List<string>();
+            commands.Add($"config server {url}");
             commands.Add($"login --apikey");
             commands.Add($"unlock {password} --raw");
 
-            
+
             foreach (var command in commands)
             {
                 //Console.Write(command + " --> "); //to tests
