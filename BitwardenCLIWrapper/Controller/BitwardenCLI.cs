@@ -126,6 +126,17 @@ namespace BitwardenVaultCLI_API.Controller
 
         }
 
+        public List<Folder> ListFolders()
+        {
+            var cmd = $"list folders --session \"{m_session}\"";
+
+            var json = IssueBitWardenCommand(cmd);
+
+            var folderList = JsonConvert.DeserializeObject<List<Folder>>(json);
+
+            return folderList;
+        }
+
         public List<Item> ListItems(string searchPattern, string folderId = "", string collectionId = "")
         {
             var cmd = new StringBuilder();

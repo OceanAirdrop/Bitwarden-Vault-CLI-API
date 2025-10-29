@@ -30,10 +30,19 @@ namespace BitwardenVaultCLI_API.Model
         public string notes { get; set; }
         public bool favorite { get; set; }
         public Login login { get; set; }
+        public List<Field> fields { get; set; }
         public List<string> collectionIds { get; set; }
         public List<Attachment> attachments { get; set; }
         public DateTime revisionDate { get; set; }
         public object deletedDate { get; set; }
+    }
+
+    [DebuggerDisplay("Name = {name}")]
+    public class Folder
+    {
+        public string @object { get; set; }
+        public string id { get; set; }
+        public string name { get; set; }
     }
 
     [DebuggerDisplay("Uri = {uri}")]
