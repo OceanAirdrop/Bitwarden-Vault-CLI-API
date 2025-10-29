@@ -361,6 +361,8 @@ namespace BitwardenVaultCLI_API.Controller
             p.StartInfo.RedirectStandardError = true;
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardInput = false;
+            p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+            p.StartInfo.StandardErrorEncoding = Encoding.UTF8;
 
             p.ErrorDataReceived += (sender, eargs) =>
             {
@@ -402,6 +404,8 @@ namespace BitwardenVaultCLI_API.Controller
             p.StartInfo.RedirectStandardError = true;
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardInput = false;
+            p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+            p.StartInfo.StandardErrorEncoding = Encoding.UTF8;
 
             p.ErrorDataReceived += (sender, eargs) =>
             {
