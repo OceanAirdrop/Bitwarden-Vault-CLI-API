@@ -126,6 +126,17 @@ namespace BitwardenVaultCLI_API.Controller
 
         }
 
+        public List<Folder> ListFolders()
+        {
+            var cmd = $"list folders --session \"{m_session}\"";
+
+            var json = IssueBitWardenCommand(cmd);
+
+            var folderList = JsonConvert.DeserializeObject<List<Folder>>(json);
+
+            return folderList;
+        }
+
         public List<Item> ListItems(string searchPattern, string folderId = "", string collectionId = "")
         {
             var cmd = new StringBuilder();
@@ -350,6 +361,8 @@ namespace BitwardenVaultCLI_API.Controller
             p.StartInfo.RedirectStandardError = true;
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardInput = false;
+            p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+            p.StartInfo.StandardErrorEncoding = Encoding.UTF8;
 
             p.ErrorDataReceived += (sender, eargs) =>
             {
@@ -391,6 +404,8 @@ namespace BitwardenVaultCLI_API.Controller
             p.StartInfo.RedirectStandardError = true;
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardInput = false;
+            p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+            p.StartInfo.StandardErrorEncoding = Encoding.UTF8;
 
             p.ErrorDataReceived += (sender, eargs) =>
             {
